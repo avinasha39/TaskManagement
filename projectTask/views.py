@@ -49,29 +49,34 @@ def project_details(request, pk):
         return JsonResponse({'message': 'The project does not exist'}, status=status.HTTP_404_NOT_FOUND) 
 
 @api_view(['GET', 'POST', 'DELETE'])
-def task_list(request):
+def task_list(request,pk):
+    #project = Project.objects.get(pk=pk) 
     if request.method == 'GET':
-        tasks = Task.objects.all()
+        tasks = Task.objects.filter(project__pk = pk)
+        tasks_serializer = TaskSerializer(tasks, many=True)
+        return JsonResponse(tasks_serializer.data, safe=False)
     elif request.method == 'POST':
         task_data = JSONParser().parse(request)
+        task_data['project'] = pk
         task_serializer = TaskSerializer(data=task_data)
         if task_serializer.is_valid():
             task_serializer.save()
-            return JsonResponse(task_serializer.data, status=status.HTTP_201_CREATED) 
+            return JsonResponse(task_serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(task_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         count = Task.objects.all().delete()
         return JsonResponse({'message': '{} Projects were deleted successfully!'.format(count[0])}, status=status.HTTP_204_NO_CONTENT)
  
-api_view(['GET', 'PUT', 'DELETE'])
-def task_details(request, pk):
+api_view(['GET', 'PATCH', 'DELETE'])
+def task_details(request, pk, tk):
     # find tutorial by pk (id)
     try: 
-        task = Task.objects.get(pk=pk) 
+        #project = Project.objects.get(pk=pk)
+        task = Task.objects.get(pk = tk)
         if request.method == 'GET': 
             task_serializer = TaskSerializer(task) 
             return JsonResponse(task_serializer.data) 
-        elif request.method == 'PUT':
+        elif request.method == 'PATCH':
             task_data = JSONParser().parse(request) 
             task_serializer = TaskSerializer(project, data=task_data) 
             if task_serializer.is_valid(): 
@@ -80,7 +85,7 @@ def task_details(request, pk):
             return JsonResponse(task_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         elif request.method == 'DELETE': 
             task.delete() 
-            return JsonResponse({'message': 'Task was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)        
+            return JsonResponse({'message': 'Task was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)    
     except Project.DoesNotExist: 
         return JsonResponse({'message': 'The Task does not exist'}, status=status.HTTP_404_NOT_FOUND) 
  

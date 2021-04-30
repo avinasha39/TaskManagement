@@ -12,3 +12,4 @@ class Task(models.Model):
     description = models.CharField(max_length=200,blank=False, default='')
     startDate = models.DateField(auto_now_add=True)
     endDate = models.DateField(auto_now=False, auto_now_add=False)
+    project = models.ForeignKey(to = Project, on_delete=models.CASCADE,related_name="tasks")
