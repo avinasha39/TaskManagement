@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 from django.http.response import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser 
 from rest_framework import status 
 
@@ -9,8 +10,8 @@ from projectTask.ProjectSerializer import ProjectSerializer
 from projectTask.TaskSerializer import TaskSerializer
 from rest_framework.decorators import api_view
 
+from django.core.files.storage import default_storage
 
-# Create your views here.
 @api_view(['GET','POST','DELETE'])
 def project_list(request):
     # GET list of projects, POST a new projects, DELETE all projects
@@ -90,3 +91,9 @@ def task_details(request, pk, tk):
         return JsonResponse({'message': 'The Task does not exist'}, status=status.HTTP_404_NOT_FOUND) 
  
     # GET / PUT / DELETE tutorial
+
+@csrf_exempt
+def SaveFile(request):
+    file = request.FILES['uploadedFile']
+    file_name = default_storage.save(file.name, file)
+    return JsonResponse(file_name, safe= False)
