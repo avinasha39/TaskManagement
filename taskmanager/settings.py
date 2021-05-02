@@ -28,7 +28,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 SECRET_KEY = 'django-insecure-1yx#r@x!t4k9*(#-k0xr_no2uha8^0a57xm8+3pt-xca=krm$6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.storage.CompressedManifestStaticFilesStorage',
 ]
 
 ROOT_URLCONF = 'taskmanager.urls'
