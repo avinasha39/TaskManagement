@@ -1,5 +1,4 @@
 Click==7.0
-dbus-python==1.2.16
 Django==3.2
 django-cors-headers==3.7.0
 djangorestframework==3.12.4
