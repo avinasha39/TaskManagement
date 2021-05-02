@@ -11,14 +11,18 @@ from projectTask.TaskSerializer import TaskSerializer
 from rest_framework.decorators import api_view
 
 from django.core.files.storage import default_storage
+import base64
+from django.core.files.base import ContentFile
 
 @api_view(['GET','POST','DELETE'])
 def project_list(request):
     # GET list of projects, POST a new projects, DELETE all projects
     if request.method == 'GET':
         projects = Project.objects.all()
+        projects_serializer = ProjectSerializer(projects, many=True)
+        return JsonResponse(projects_serializer.data, safe=False)
     elif request.method == 'POST':
-        project_data = JSONParser().parse(request)
+        project_data = JSONParser().parse(request)       
         project_serializer = ProjectSerializer(data=project_data)
         if project_serializer.is_valid():
             project_serializer.save()
@@ -45,7 +49,7 @@ def project_details(request, pk):
             return JsonResponse(project_serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         elif request.method == 'DELETE': 
             project.delete() 
-            return JsonResponse({'message': 'Tutorial was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)        
+            return JsonResponse({'message': 'Project was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)        
     except Project.DoesNotExist: 
         return JsonResponse({'message': 'The project does not exist'}, status=status.HTTP_404_NOT_FOUND) 
 
@@ -68,7 +72,7 @@ def task_list(request,pk):
         count = Task.objects.all().delete()
         return JsonResponse({'message': '{} Projects were deleted successfully!'.format(count[0])}, status=status.HTTP_204_NO_CONTENT)
  
-api_view(['GET', 'PATCH', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 def task_details(request, pk, tk):
     # find tutorial by pk (id)
     try: 
@@ -79,7 +83,7 @@ def task_details(request, pk, tk):
             return JsonResponse(task_serializer.data) 
         elif request.method == 'PATCH':
             task_data = JSONParser().parse(request) 
-            task_serializer = TaskSerializer(project, data=task_data) 
+            task_serializer = TaskSerializer(task, data=task_data) 
             if task_serializer.is_valid(): 
                 task_serializer.save() 
                 return JsonResponse(task_serializer.data) 
@@ -93,7 +97,14 @@ def task_details(request, pk, tk):
     # GET / PUT / DELETE tutorial
 
 @csrf_exempt
-def SaveFile(request):
-    file = request.FILES['uploadedFile']
-    file_name = default_storage.save(file.name, file)
-    return JsonResponse(file_name, safe= False)
+@api_view(['GET', 'POST'])
+def SaveFile(request,pk):
+    if request.method == 'POST': 
+        file = request.FILES
+        Project.objects.filter(pk = pk).update(photoFileName=file)
+        project_serializer = ProjectSerializer(Project.objects.get(pk=pk)) 
+        return JsonResponse(project_serializer.data) 
+    elif request.method == 'GET': 
+        project_serializer = ProjectSerializer(Project.objects.get(pk=pk)) 
+        return JsonResponse(project_serializer.data)
+    

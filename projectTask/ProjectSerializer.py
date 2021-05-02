@@ -10,4 +10,4 @@ class ProjectSerializer(serializers.ModelSerializer):
                   'title',
                   'description',
                   'duration',
-                  'photo')
+                  'photoFileName')
